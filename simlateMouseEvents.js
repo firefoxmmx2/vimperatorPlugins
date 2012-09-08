@@ -5,35 +5,62 @@
 (function(){
     let self=liberator.plugins.simulateMouseEvents=(function(){
 
-        var fireMouseEvt=function(evtString){
+        var fireMouseEvt=function(elem,evtString){
             var doc=content.document.wrappedJSObject;
 
             if(doc.createEvent){
                 var evt=doc.createEvent('MouseEvents');
                 evt.initEvent(evtString,true,false);
-                doc.activeElement.dispatchEvent(evt);
+                elem.dispatchEvent(evt);
             }
             else if(doc.createEventObject){
-                doc.activeElement.fireEvent('on'+evtString);
+                elem.fireEvent('on'+evtString);
             }
         };
 
         var PUBLICS={
-            mouseover:function(){
-                fireMouseEvt('mouseover');
-                var activeElement=content.document.wrappedJSObject.activeElement;
-                activeElement.setAttribute('isMouseover',true);
+            mouseover:function(elem){
+                if(elem){
+                    fireMouseEvt(elem,'mouseover');
+                    elem.setAttribute('isMouseover',true);
+                }
+                else{
+                    var activeElement=content.document.wrappedJSObject.activeElement;
+                    fireMouseEvt(activeElement,'mouseover');
+                    activeElement.setAttribute('isMouseover',true);
+                }
+                
                     
             },
-            mouseout:function(){
-                fireMouseEvt('mouseout');
-                var activeElement=content.document.wrappedJSObject.activeElement;
-                activeElement.setAttribute('isMouseover',false);
+            mouseout:function(elem){
+                if(elem){
+                    fireMouseEvt(elem,'mouseout');
+                    elem.setAttribute('isMouseover',false);
+                }
+                else{
+                    var activeElement=content.document.wrappedJSObject.activeElement;
+                    fireMouseEvt(activeElement,'mouseout');
+
+                    activeElement.setAttribute('isMouseover',false);
+ 
+                }
             }
         };
 
         //registe extend hint command like ;m
-        
+        hints.addMode(
+                'm',
+                'active element trigge mouseover/mouseout',
+                function(node){
+                    if(node.getAttribute('isMouseover')){
+                        self.mouseout(node);
+                    }
+                    else{
+                        self.mouseover(node);
+                    }
+
+
+        });
         return PUBLICS;
     })();
 })();
