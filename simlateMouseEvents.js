@@ -52,11 +52,19 @@
                 'm',
                 'active element trigge mouseover/mouseout',
                 function(node){
-                    if(node.getAttribute('isMouseover')){
+                    if(node.getAttribute('isMouseover') && node.getAttribute('isMouseover') == 'true'){
                         self.mouseout(node);
                     }
                     else{
                         self.mouseover(node);
+                        //全局的上一个触发过over事件的元素
+                        if(self.overElem && self.overElem!=node){
+                            try{
+                                self.overElem.setAttribute('isMouseover',false);
+                            }
+                            catch(e){}
+                        }
+                        self.overElem=node;
                     }
 
 
