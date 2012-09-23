@@ -1,13 +1,36 @@
 // ehentai downloader.js
 // 下载 ehentai 上面的漫画。
-// 用户需要在配置文件中设置全局变量ehentai_save_path;
+// 用户需要在配置文件中设置全局变量eh_save_path;和eh_page_interval_time和eh_img_download_interval_time
+// @var eh_save_path 全局的下载保存地址;
+// @var eh_page_interval_time 每页访问间隔时间 (单位毫秒);
+// @var eh_img_download_interval_time 每个图片的下载间隔 (单位毫秒)
+// 注意：这里没有使用代理或者动态网页代理，所以过快的访问可能会造成网站的IP屏蔽。
 (function(){
     let self = liberator.plugins.ehentai = (function(){
         //注册命令 
-        
-        var savePath = liberator.globalVariables.ehentai_save_path;
+        commands.addUserCommand(
+            ['eh','ehentai'],
+            function(arg){},
+            {
+                options:[],
+        subCommands:[
+            new Command(
+                ['downladCurrentTab','dct'],
+                '从当前页面下载',
+                function(arg){
+
+                })
+            ]
+            });
+        var savePath = liberator.globalVariables.eh_save_path;
+        //默认每页间隔时间30秒
+        var intervalTime = liberator.globalVariables.eh_page_interval_time || 1500 * 20;
+        //默认的每个图片访问下载间隔 1.5秒，如果过快访问会造成IP屏蔽
+        var amplification = liberator.globalVariables.eh_img_download_interval_time || 1500;
+
         var dirPath;
         var fileName;
+
         //返回操作对象
         var ehentaiManager = {
             //下载当前标签页的ehentai资源
@@ -16,11 +39,7 @@
                 var doc = content.document.wrappedJSObject;
                 var window = content.window.wrappedJSObject;
                 var title;
-                //默认间隔时间5秒
-                var intervalTime = 1500 * 20;
                 
-                var amplification = 1500;
-
                 var baseURL = window.location.href;
 
                 //窗口的详情页面判断
@@ -29,6 +48,10 @@
                     title = doc.querySelector('#gd2 h1:last-child').textContent;
                     if(!title)
                         title = doc.querySelector('#gd2 h1:first-child').textContent;
+                    if(!savePath){
+                        throw "请在.vimperatorrc设置全局保存地址eh_save_path"
+                        return;
+                    }
                     dirPath = savePath+ '/' +"'"+title+"'";
                     var saveDir = new File(dirPath);
                     if(!saveDir.exists()){
