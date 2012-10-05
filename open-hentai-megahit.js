@@ -7,6 +7,7 @@
             ['megahit','mh'],
             'Open Megahit comic by year-month on Nyaa Torrent',
             function(arg){
+                arg = formatDate(arg);
                 self.open(arg);   
             },
             null,
@@ -21,7 +22,14 @@
         //a format date function
         var formatDate = function(needFormatDate){
             var formatedDate;
-
+            var pattern = /^\d{0,2}(\d{2})(\d{2})$/;
+            var matchers = pattern.exec(needFormatDate);
+            if(matchers){
+                formatedDate = matchers[1]+matchers[2];
+            }
+            else{
+                throw "你输入的时间格式不对,请用YYYYMM或者YYMM的形式";
+            }
             return formatedDate;
         }
         //return one
