@@ -9,20 +9,30 @@
     let self = liberator.plugins.ehentai = (function(){
         //注册命令 
         commands.addUserCommand(
-            ['eh','ehentai'],
-            function(arg){},
+            ['ehentai','eh'],
+            'ehentai 漫画下载服务',
+            function(arg){
+                liberator.echoerr("错误,必须输入子命令!");
+            },
             {
                 options:[],
         subCommands:[
             new Command(
-                ['downladCurrentTab','dct'],
+                ['downloadCurrentTab','dct'],
                 '从当前页面下载',
                 function(arg){
-
+                    self.currTabDownload();
                 })
-            ]
+        ],
+        completer: function(context, args){
+
+        }
             });
         var savePath = liberator.globalVariables.eh_save_path;
+        if(!savePath){
+            throw "请在.vimperatorrc设置全局保存地址eh_save_path";
+            return;
+        }
         //默认每页间隔时间30秒
         var intervalTime = liberator.globalVariables.eh_page_interval_time || 1500 * 20;
         //默认的每个图片访问下载间隔 1.5秒，如果过快访问会造成IP屏蔽
@@ -48,10 +58,7 @@
                     title = doc.querySelector('#gd2 h1:last-child').textContent;
                     if(!title)
                         title = doc.querySelector('#gd2 h1:first-child').textContent;
-                    if(!savePath){
-                        throw "请在.vimperatorrc设置全局保存地址eh_save_path"
-                        return;
-                    }
+                    
                     dirPath = savePath+ '/' +"'"+title+"'";
                     var saveDir = new File(dirPath);
                     if(!saveDir.exists()){
@@ -70,6 +77,7 @@
                         totalpage = (pageinfo[3] % pagesize) ? (parseInt(pageinfo[3] / pagesize) + 1) : parseInt(pageinfo[3] / pagesize);
                     }
 
+                    //去掉分页信息
                     baseURL = baseURL.substring(0,baseURL.lastIndexOf("/")+1);
                     var downPicture = function(doc){
                         var lateTime = 500;
@@ -96,15 +104,14 @@
 
                         }
 
-                        for(var i=0;i<as.length;i++){
-                            const a = as[i];
+                        Array.prototype.forEach.call(as,function(a){
                             (function(auchor){ 
                                 setTimeout(function(){
                                     goDetailPage(auchor); 
                                 },lateTime);
                                 lateTime += amplification;     
                             })(a);
-                        }
+                        });
 
                     };
                    if(pagenow<totalpage){
